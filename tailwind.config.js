@@ -21,9 +21,19 @@ export default {
           "50%": { transform: "rotate(-1deg) scale(0.97)" },
           "75%": { transform: "rotate(3deg) scale(1.03)" },
         },
+        "toast-in": {
+          "0%": { opacity: "0", transform: "translateY(12px) scale(0.96)" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0px)" },
+          "50%": { transform: "translateY(-12px)" },
+        },
       },
       animation: {
         flicker: "flicker 2.4s ease-in-out infinite",
+        "toast-in": "toast-in 0.25s ease-out forwards",
+        float: "float 2.5s ease-in-out infinite",
       },
     },
   },

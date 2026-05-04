@@ -13,7 +13,6 @@ const products = [
     price: 349,
     image:
       "https://images.unsplash.com/photo-1528351655744-27cc30462816?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2FuZGxlfGVufDB8fDB8fHww",
-    burnTime: "55 hrs",
     scent: "Oud · Amber · Musk",
     category: "Oriental",
     price_range: "300-400",
@@ -28,7 +27,6 @@ const products = [
     price: 299,
     image:
       "https://images.unsplash.com/photo-1612293905607-b003de9e54fb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y2FuZGxlfGVufDB8fDB8fHww",
-    burnTime: "45 hrs",
     scent: "Rose · Vanilla · Sandalwood",
     category: "Floral",
     price_range: "under-300",
@@ -43,7 +41,6 @@ const products = [
     price: 379,
     image:
       "https://images.unsplash.com/photo-1572726729207-a78d6feb18d7?w=600&q=80",
-    burnTime: "60 hrs",
     scent: "Cedar · Smoke · Leather",
     category: "Woody",
     price_range: "300-400",
@@ -60,11 +57,6 @@ const priceRanges = [
   { label: "Under 300 EGP", value: "under-300" },
   { label: "300 – 400 EGP", value: "300-400" },
   { label: "Above 400 EGP", value: "above-400" },
-];
-const burnTimes = [
-  { label: "All", value: "all" },
-  { label: "Under 50 hrs", value: "under-50" },
-  { label: "50 hrs +", value: "50-plus" },
 ];
 
 // ─── Sub-components ────────────────────────────────────────────────────────────
@@ -148,17 +140,6 @@ function FiltersContent({
       </FilterSection>
 
       <div className="h-px bg-border mb-5" />
-
-      <FilterSection title="Burn Time">
-        {burnTimes.map((b) => (
-          <FilterOption
-            key={b.value}
-            label={b.label}
-            active={selectedBurn === b.value}
-            onClick={() => setSelectedBurn(b.value)}
-          />
-        ))}
-      </FilterSection>
     </>
   );
 }
@@ -185,11 +166,8 @@ export default function Products() {
       (selectedPrice === "under-300" && p.price < 300) ||
       (selectedPrice === "300-400" && p.price >= 300 && p.price <= 400) ||
       (selectedPrice === "above-400" && p.price > 400);
-    const burnMatch =
-      selectedBurn === "all" ||
-      (selectedBurn === "under-50" && parseInt(p.burnTime) < 50) ||
-      (selectedBurn === "50-plus" && parseInt(p.burnTime) >= 50);
-    return searchMatch && categoryMatch && priceMatch && burnMatch;
+
+    return searchMatch && categoryMatch && priceMatch;
   });
 
   function resetFilters() {

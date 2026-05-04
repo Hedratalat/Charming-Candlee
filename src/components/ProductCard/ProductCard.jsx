@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { useCart } from "../../context/CartContext";
 
 export default function ProductCard({ product }) {
-  const [isFav, setIsFav] = useState(false);
-  const [added, setAdded] = useState(false);
+  const { addToCart, toggleFav, favorites, cart } = useCart();
+  const isFav = favorites.some((f) => f.id === product.id);
+  const isInCart = cart.some((item) => item.id === product.id);
   const [imgLoaded, setImgLoaded] = useState(false);
 
   function handleAddToCart() {
-    setAdded(true);
-    setTimeout(() => setAdded(false), 1800);
+    addToCart(product);
   }
 
   return (
@@ -20,7 +21,7 @@ export default function ProductCard({ product }) {
       <div className="relative h-[280px] overflow-hidden bg-[#F5E8D8] shrink-0">
         {/* Favourite button */}
         <button
-          onClick={() => setIsFav(!isFav)}
+          onClick={() => toggleFav(product)}
           className="absolute bottom-[14px] right-[14px] z-10 w-9 h-9 rounded-full border
            border-border bg-accent/90 backdrop-blur-sm flex items-center justify-center cursor-pointer
             transition-transform duration-200 hover:scale-110"
@@ -45,8 +46,9 @@ export default function ProductCard({ product }) {
           src={product.image}
           alt={product.name}
           onLoad={() => setImgLoaded(true)}
-          className={`w-full h-full object-cover
-             block transition-opacity duration-500 ${imgLoaded ? "opacity-100" : "opacity-0"}`}
+          className={`w-full h-full object-cover block transition-opacity duration-500 ${
+            imgLoaded ? "opacity-100" : "opacity-0"
+          }`}
         />
       </div>
 
@@ -82,20 +84,9 @@ export default function ProductCard({ product }) {
           <p className="text-[13px] text-[#5a3a20] leading-[1.7] mb-3.5 opacity-80">
             {product.description}
           </p>
-
-          {/* Burn time spec */}
-          <div className="mb-[18px]">
-            <div className="inline-flex items-center gap-1.5 bg-accent border border-border rounded-[10px] px-3.5 py-[7px]">
-              <span className="text-sm">⏱</span>
-              <span className="text-[11px] text-primary/60">Burn time</span>
-              <span className="text-[12px] font-semibold text-dark">
-                {product.burnTime}
-              </span>
-            </div>
-          </div>
         </div>
 
-        {/* Bottom*/}
+        {/* Bottom */}
         <div>
           <div className="h-px bg-border mb-4" />
           <div className="flex items-center justify-between">
@@ -106,17 +97,18 @@ export default function ProductCard({ product }) {
             <button
               onClick={handleAddToCart}
               disabled={!product.inStock}
-              className={`flex items-center gap-1.5 px-5 py-[11px] rounded-xl text-[13px] font-semibold text-accent border-none tracking-[0.02em] transition-all duration-300 active:scale-95 ${
-                !product.inStock
-                  ? "bg-primary/40 cursor-not-allowed"
-                  : added
-                    ? "bg-dark cursor-pointer"
-                    : "bg-primary hover:bg-[#7a5030] cursor-pointer"
-              }`}
+              className={`flex items-center gap-1.5 px-5 py-[11px] rounded-xl text-[13px] font-semibold
+                text-accent border-none tracking-[0.02em] transition-all duration-300 active:scale-95 ${
+                  !product.inStock
+                    ? "bg-primary/40 cursor-not-allowed"
+                    : isInCart
+                      ? "bg-dark cursor-pointer"
+                      : "bg-primary hover:bg-[#7a5030] cursor-pointer"
+                }`}
             >
               {!product.inStock ? (
                 "Out of Stock"
-              ) : added ? (
+              ) : isInCart ? (
                 <>
                   <svg
                     viewBox="0 0 16 16"

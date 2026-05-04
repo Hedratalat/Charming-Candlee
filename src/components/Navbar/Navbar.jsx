@@ -1,6 +1,7 @@
 import { FaHeart, FaShoppingCart, FaBars, FaTimes } from "react-icons/fa";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useCart } from "../../context/CartContext";
 
 const navLinks = [
   { name: "Home", to: "/" },
@@ -10,13 +11,22 @@ const navLinks = [
   { name: "Contact", to: "/contact" },
 ];
 
-function Icon({ icon: Icon, onClick, size = 24 }) {
+function Icon({ icon: Icon, onClick, size = 24, count }) {
   return (
-    <div className="cursor-pointer" onClick={onClick}>
+    <div className="relative cursor-pointer" onClick={onClick}>
       <Icon
         size={size}
         className="hover:text-primary transition-colors duration-300"
       />
+      {count > 0 && (
+        <span
+          className="absolute -top-2 -right-2 min-w-[17px] h-[17px] px-[3px]
+          bg-primary text-accent text-[10px] font-bold rounded-full
+          flex items-center justify-center leading-none tabular-nums"
+        >
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
     </div>
   );
 }
@@ -24,6 +34,7 @@ function Icon({ icon: Icon, onClick, size = 24 }) {
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const navigate = useNavigate();
+  const { cartCount, favCount } = useCart();
 
   return (
     <nav className="bg-white/70 shadow sticky top-0 w-full z-50 backdrop-blur-md border-b border-border">
@@ -68,8 +79,16 @@ export default function Navbar() {
             </ul>
 
             <div className="flex items-center space-x-4 text-dark text-xl">
-              <Icon icon={FaHeart} onClick={() => navigate("/favorites")} />
-              <Icon icon={FaShoppingCart} onClick={() => navigate("/cart")} />
+              <Icon
+                icon={FaHeart}
+                onClick={() => navigate("/favorites")}
+                count={favCount}
+              />
+              <Icon
+                icon={FaShoppingCart}
+                onClick={() => navigate("/cart")}
+                count={cartCount}
+              />
             </div>
           </div>
 
@@ -79,11 +98,13 @@ export default function Navbar() {
               icon={FaHeart}
               onClick={() => navigate("/favorites")}
               size={22}
+              count={favCount}
             />
             <Icon
               icon={FaShoppingCart}
               onClick={() => navigate("/cart")}
               size={22}
+              count={cartCount}
             />
             <button
               onClick={() => setMenuOpen(!menuOpen)}
