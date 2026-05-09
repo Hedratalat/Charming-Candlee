@@ -1,57 +1,13 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Navbar from "../components/Navbar/Navbar";
 import ProductCard from "../components/ProductCard/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from "../components/Footer/Footer";
+import { useProducts } from "../hooks/useProducts";
 
-// ─── Mock Data ────────────────────────────────────────────────────────────────
-const products = [
-  {
-    id: 1,
-    name: "Amber & Oud",
-    subtitle: "Luxury Scented Candle",
-    price: 349,
-    image:
-      "https://images.unsplash.com/photo-1528351655744-27cc30462816?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8Y2FuZGxlfGVufDB8fDB8fHww",
-    scent: "Oud · Amber · Musk",
-    category: "Oriental",
-    price_range: "300-400",
-    description:
-      "A rich oriental blend of authentic oud and warm amber, crafting an atmosphere of deep calm and timeless elegance.",
-    inStock: false,
-  },
-  {
-    id: 2,
-    name: "Rose & Vanilla",
-    subtitle: "Luxury Scented Candle",
-    price: 299,
-    image:
-      "https://images.unsplash.com/photo-1612293905607-b003de9e54fb?w=600&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8N3x8Y2FuZGxlfGVufDB8fDB8fHww",
-    scent: "Rose · Vanilla · Sandalwood",
-    category: "Floral",
-    price_range: "under-300",
-    description:
-      "A soft floral heart wrapped in warm vanilla, perfect for cozy evenings at home.",
-    inStock: true,
-  },
-  {
-    id: 3,
-    name: "Cedar & Smoke",
-    subtitle: "Luxury Scented Candle",
-    price: 379,
-    image:
-      "https://images.unsplash.com/photo-1572726729207-a78d6feb18d7?w=600&q=80",
-    scent: "Cedar · Smoke · Leather",
-    category: "Woody",
-    price_range: "300-400",
-    description:
-      "Bold and grounding — a woody smoke blend that transforms any room into a sanctuary.",
-    inStock: true,
-  },
-];
+// ─── Config ────────────────────────────────────────────────────────────────────
+const PRODUCTS_PER_PAGE = 6;
 
-// ─── Filter Config ─────────────────────────────────────────────────────────────
-const categories = ["All", "Floral", "Woody", "Oriental", "Fresh"];
 const priceRanges = [
   { label: "All Prices", value: "all" },
   { label: "Under 300 EGP", value: "under-300" },
@@ -86,21 +42,19 @@ function FilterOption({ label, active, onClick }) {
   );
 }
 
-// ─── Shared filter content (used in both sidebar & drawer) ────────────────────
 function FiltersContent({
+  categories,
   selectedCategory,
   setSelectedCategory,
   selectedPrice,
   setSelectedPrice,
-  selectedBurn,
-  setSelectedBurn,
   isFiltered,
   resetFilters,
 }) {
   return (
     <>
       <div className="flex items-center justify-between mb-5">
-        <span className="font-heading text-[16px] font-bold text-dark">
+        <span className="  font-heading text-[16px] font-bold text-dark">
           Filters
         </span>
         {isFiltered && (
@@ -144,21 +98,123 @@ function FiltersContent({
   );
 }
 
+// ─── Pagination Component ───────────────────────────────────────────────────────
+function Pagination({ currentPage, totalPages, onPageChange }) {
+  if (totalPages <= 1) return null;
+
+  // Show max 4 page numbers centered around current page
+  const MAX_VISIBLE = 4;
+  const getPageNumbers = () => {
+    if (totalPages <= MAX_VISIBLE) {
+      return Array.from({ length: totalPages }, (_, i) => i + 1);
+    }
+    let start = Math.max(1, currentPage - 1);
+    let end = start + MAX_VISIBLE - 1;
+    if (end > totalPages) {
+      end = totalPages;
+      start = Math.max(1, end - MAX_VISIBLE + 1);
+    }
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  };
+
+  const pageNumbers = getPageNumbers();
+
+  return (
+    <div className="flex items-center justify-center gap-1.5 mt-12 select-none">
+      {/* Prev button */}
+      <button
+        onClick={() => currentPage > 1 && onPageChange(currentPage - 1)}
+        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium border transition-all duration-200 cursor-pointer ${
+          currentPage === 1
+            ? "opacity-35 cursor-not-allowed border-transparent text-primary"
+            : "border-border text-dark hover:bg-white hover:border-primary/40"
+        }`}
+      >
+        <svg
+          viewBox="0 0 16 16"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M10 12L6 8l4-4" />
+        </svg>
+        Prev
+      </button>
+
+      {/* Page numbers */}
+      <div className="flex items-center gap-1">
+        {pageNumbers.map((page) => (
+          <button
+            key={page}
+            onClick={() => onPageChange(page)}
+            className={`w-9 h-9 rounded-xl text-[13px] font-medium transition-all duration-200 cursor-pointer border ${
+              currentPage === page
+                ? "bg-primary text-accent border-primary shadow-sm"
+                : "text-dark border-transparent hover:border-border hover:bg-white"
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+      </div>
+
+      {/* Next button */}
+      <button
+        onClick={() =>
+          currentPage < totalPages && onPageChange(currentPage + 1)
+        }
+        className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-[13px] font-medium border transition-all duration-200 cursor-pointer ${
+          currentPage === totalPages
+            ? "opacity-35 cursor-not-allowed border-transparent text-primary"
+            : "border-border text-dark hover:bg-white hover:border-primary/40"
+        }`}
+      >
+        Next
+        <svg
+          viewBox="0 0 16 16"
+          width="14"
+          height="14"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.8"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <path d="M6 4l4 4-4 4" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 // ─── Products Page ─────────────────────────────────────────────────────────────
 export default function Products() {
+  const { products, loading, error } = useProducts();
+
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPrice, setSelectedPrice] = useState("all");
-  const [selectedBurn, setSelectedBurn] = useState("all");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const categories = useMemo(() => {
+    const unique = [
+      ...new Set(products.map((p) => p.category).filter(Boolean)),
+    ];
+    return ["All", ...unique.sort()];
+  }, [products]);
 
   const filtered = products.filter((p) => {
     const q = searchQuery.toLowerCase();
     const searchMatch =
       !q ||
-      p.name.toLowerCase().includes(q) ||
-      p.scent.toLowerCase().includes(q) ||
-      p.category.toLowerCase().includes(q);
+      p.name?.toLowerCase().includes(q) ||
+      p.scent?.toLowerCase().includes(q) ||
+      p.category?.toLowerCase().includes(q);
     const categoryMatch =
       selectedCategory === "All" || p.category === selectedCategory;
     const priceMatch =
@@ -170,25 +226,43 @@ export default function Products() {
     return searchMatch && categoryMatch && priceMatch;
   });
 
+  // ─── Pagination logic ──────────────────────────────────────────────────────
+  const totalPages = Math.ceil(filtered.length / PRODUCTS_PER_PAGE);
+  const paginatedProducts = filtered.slice(
+    (currentPage - 1) * PRODUCTS_PER_PAGE,
+    currentPage * PRODUCTS_PER_PAGE,
+  );
+
+  // Reset to page 1 whenever filters change
+  function handleFilterChange(setter) {
+    return (value) => {
+      setter(value);
+      setCurrentPage(1);
+    };
+  }
+
+  function handlePageChange(page) {
+    setCurrentPage(page);
+    // Smooth scroll to top of grid
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   function resetFilters() {
     setSelectedCategory("All");
     setSelectedPrice("all");
-    setSelectedBurn("all");
     setSearchQuery("");
+    setCurrentPage(1);
   }
 
   const isFiltered =
-    selectedCategory !== "All" ||
-    selectedPrice !== "all" ||
-    selectedBurn !== "all" ||
-    searchQuery !== "";
+    selectedCategory !== "All" || selectedPrice !== "all" || searchQuery !== "";
+
   const filterProps = {
+    categories,
     selectedCategory,
-    setSelectedCategory,
+    setSelectedCategory: handleFilterChange(setSelectedCategory),
     selectedPrice,
-    setSelectedPrice,
-    selectedBurn,
-    setSelectedBurn,
+    setSelectedPrice: handleFilterChange(setSelectedPrice),
     isFiltered,
     resetFilters,
   };
@@ -249,13 +323,19 @@ export default function Products() {
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
               placeholder="Search by name or scent…"
               className="w-full pl-10 pr-9 py-2.5 text-sm rounded-xl border border-border bg-white text-dark placeholder:text-primary/40 focus:outline-none focus:border-primary transition-colors"
             />
             {searchQuery && (
               <button
-                onClick={() => setSearchQuery("")}
+                onClick={() => {
+                  setSearchQuery("");
+                  setCurrentPage(1);
+                }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-primary/50 hover:text-primary cursor-pointer"
               >
                 ✕
@@ -272,7 +352,29 @@ export default function Products() {
 
             {/* ── Grid ── */}
             <div className="flex-1 min-w-0">
-              {filtered.length === 0 ? (
+              {/* Loading */}
+              {loading && (
+                <div className="flex flex-col items-center justify-center py-24 gap-3">
+                  <span className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+                  <p className="text-sm text-primary/60">Loading candles…</p>
+                </div>
+              )}
+
+              {/* Error */}
+              {error && (
+                <div className="flex flex-col items-center justify-center py-24 text-center">
+                  <span className="text-4xl mb-4">⚠️</span>
+                  <p className="font-heading text-xl text-dark font-bold mb-1">
+                    Something went wrong
+                  </p>
+                  <p className="text-[13px] text-primary/60">
+                    Could not load products. Please try again.
+                  </p>
+                </div>
+              )}
+
+              {/* Empty */}
+              {!loading && !error && filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-24 text-center">
                   <span className="text-4xl mb-4">🕯️</span>
                   <p className="font-heading text-xl text-dark font-bold mb-1">
@@ -288,24 +390,36 @@ export default function Products() {
                     Reset Filters
                   </button>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
-                  <AnimatePresence mode="popLayout">
-                    {filtered.map((product, index) => (
-                      <motion.div
-                        key={product.id}
-                        layout
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        transition={{ duration: 0.3, delay: index * 0.08 }}
-                        className="h-full"
-                      >
-                        <ProductCard product={product} />
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
+              )}
+
+              {/* Grid */}
+              {!loading && !error && filtered.length > 0 && (
+                <>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6 items-stretch">
+                    <AnimatePresence mode="popLayout">
+                      {paginatedProducts.map((product, index) => (
+                        <motion.div
+                          key={product.id}
+                          layout
+                          initial={{ opacity: 0, y: 20 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          transition={{ duration: 0.3, delay: index * 0.05 }}
+                          className="h-full"
+                        >
+                          <ProductCard product={product} />
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* Pagination */}
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                  />
+                </>
               )}
             </div>
           </div>
@@ -316,7 +430,6 @@ export default function Products() {
       <AnimatePresence>
         {drawerOpen && (
           <>
-            {/* Overlay */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -325,8 +438,6 @@ export default function Products() {
               onClick={() => setDrawerOpen(false)}
               className="fixed inset-0 bg-dark/40 z-40 lg:hidden"
             />
-
-            {/* Drawer */}
             <motion.div
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
@@ -334,12 +445,30 @@ export default function Products() {
               transition={{ type: "spring", damping: 28, stiffness: 300 }}
               className="fixed bottom-0 left-0 right-0 z-50 lg:hidden bg-secondary rounded-t-[24px] p-6 max-h-[80vh] overflow-y-auto"
             >
-              {/* Handle */}
+              {/* Drag handle */}
               <div className="w-10 h-1 bg-border rounded-full mx-auto mb-5" />
 
-              <FiltersContent {...filterProps} />
+              {/* Header with X button */}
+              <button
+                onClick={() => setDrawerOpen(false)}
+                className="absolute top-5 right-5 w-8 h-8 flex items-center
+                 justify-center rounded-full hover:bg-border/60 text-primary/50 hover:text-dark
+                  transition-all cursor-pointer"
+              >
+                <svg
+                  viewBox="0 0 16 16"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                >
+                  <path d="M2 2l12 12M14 2L2 14" />
+                </svg>
+              </button>
 
-              {/* Apply button */}
+              <FiltersContent {...filterProps} />
               <button
                 onClick={() => setDrawerOpen(false)}
                 className="w-full bg-primary text-accent text-[14px] font-semibold py-3.5 rounded-xl cursor-pointer mt-2"
@@ -350,6 +479,7 @@ export default function Products() {
           </>
         )}
       </AnimatePresence>
+
       <Footer />
     </>
   );
