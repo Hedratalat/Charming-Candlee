@@ -12,7 +12,10 @@ const Cart = lazy(() => import("./pages/Cart"));
 const DashBoardLayout = lazy(
   () => import("./components/DashboardLayout/DashboardLayout"),
 );
+
 const AddProducts = lazy(() => import("./pages/AddProducts"));
+const ManageProducts = lazy(() => import("./pages/ManageProducts"));
+const MessageDash = lazy(() => import("./pages/MessageDash"));
 function App() {
   return (
     <>
@@ -36,9 +39,9 @@ function App() {
             >
               <Route index element={<Navigate to="addProducts" replace />} />
               <Route path="addProducts" element={<AddProducts />} />
-              {/* <Route path="productsManagement" element={<ManageProducts />} />
-              <Route path="Feedback" element={<FeedbackDash />} />
-              <Route path="message" element={<MessageDash />} /> */}
+              <Route path="ManageProducts" element={<ManageProducts />} />
+              {/* <Route path="Feedback" element={<FeedbackDash />} /> */}
+              <Route path="message" element={<MessageDash />} />
             </Route>
           </Routes>
         </Suspense>

@@ -84,7 +84,7 @@ export default function Cart() {
               {/* Items */}
               {cart.map((item) => (
                 <div
-                  key={item.id}
+                  key={item.cartKey}
                   className="flex flex-col sm:flex-row sm:items-center gap-4 bg-secondary border border-border
                     rounded-[20px] p-4 shadow-[0_2px_8px_rgba(61,31,10,0.06)]"
                 >
@@ -103,7 +103,9 @@ export default function Cart() {
                         {item.name}
                       </h3>
                       <p className="text-[12px] text-primary/60 mt-0.5 truncate">
-                        {item.scent}
+                        {item.selectedScents && item.selectedScents.length > 0
+                          ? `🌿 ${item.selectedScents.join(" · ")}`
+                          : item.scent}
                       </p>
                       <p className="font-heading text-[18px] font-bold text-primary mt-1">
                         {item.price} EGP
@@ -116,7 +118,7 @@ export default function Cart() {
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity - 1)
+                          updateQuantity(item.cartKey, item.quantity - 1)
                         }
                         className="w-8 h-8 rounded-lg border border-border bg-accent flex items-center
                           justify-center text-dark text-lg font-medium cursor-pointer
@@ -129,7 +131,7 @@ export default function Cart() {
                       </span>
                       <button
                         onClick={() =>
-                          updateQuantity(item.id, item.quantity + 1)
+                          updateQuantity(item.cartKey, item.quantity + 1)
                         }
                         className="w-8 h-8 rounded-lg border border-border bg-accent flex items-center
                           justify-center text-dark text-lg font-medium cursor-pointer
@@ -144,7 +146,7 @@ export default function Cart() {
                         {item.price * item.quantity} EGP
                       </p>
                       <button
-                        onClick={() => removeFromCart(item.id)}
+                        onClick={() => removeFromCart(item.cartKey)}
                         className="text-[11px] text-primary/50 underline cursor-pointer
                           hover:text-primary transition-colors mt-1"
                       >

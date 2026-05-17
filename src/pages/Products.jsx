@@ -4,6 +4,7 @@ import ProductCard from "../components/ProductCard/ProductCard";
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from "../components/Footer/Footer";
 import { useProducts } from "../hooks/useProducts";
+import { useSearchParams } from "react-router-dom";
 
 // ─── Config ────────────────────────────────────────────────────────────────────
 const PRODUCTS_PER_PAGE = 6;
@@ -195,7 +196,10 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
 export default function Products() {
   const { products, loading, error } = useProducts();
 
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [searchParams] = useSearchParams();
+  const [selectedCategory, setSelectedCategory] = useState(
+    searchParams.get("category") || "All",
+  );
   const [selectedPrice, setSelectedPrice] = useState("all");
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");

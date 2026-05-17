@@ -12,7 +12,7 @@ export function useProducts() {
       try {
         const snap = await getDocs(collection(db, "products"));
         const data = snap.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-        setProducts(data);
+        setProducts(data.sort((a, b) => (a.order ?? 9999) - (b.order ?? 9999)));
       } catch (err) {
         setError(err);
       } finally {

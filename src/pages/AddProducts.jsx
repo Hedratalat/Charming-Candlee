@@ -11,6 +11,8 @@ const EMPTY_FORM = {
   description: "",
   inStock: true,
   size: "",
+  order: "",
+  bestSeller: false,
 };
 
 function normalizeCategory(str) {
@@ -104,6 +106,8 @@ export default function AddProducts() {
       price_range:
         price < 300 ? "under-300" : price <= 400 ? "300-400" : "above-400",
       createdAt: new Date(),
+      order: form.order ? Number(form.order) : 9999,
+      bestSeller: form.bestSeller,
     };
 
     try {
@@ -273,16 +277,35 @@ export default function AddProducts() {
           )}
         </Field>
 
-        {/* ── Size + In Stock ── */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 items-end">
-          <Field label="Size in grams (optional)">
+        {/* ── Order + BestSeller + In Stock ── */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 items-end">
+          <Field label="Display Order (optional)">
             <Input
               type="number"
-              placeholder="e.g. 150"
-              value={form.size}
-              onChange={(v) => handleChange("size", v)}
+              placeholder="e.g. 1, 2, 3…"
+              value={form.order}
+              onChange={(v) => handleChange("order", v)}
             />
           </Field>
+
+          <div className="flex items-center gap-3 pb-1">
+            <button
+              type="button"
+              onClick={() => handleChange("bestSeller", !form.bestSeller)}
+              className={`relative shrink-0 w-11 h-6 rounded-full transition-colors duration-300 cursor-pointer ${
+                form.bestSeller ? "bg-primary" : "bg-border"
+              }`}
+            >
+              <span
+                className={`absolute top-[4px] left-[4px] w-4 h-4 rounded-full bg-white shadow transition-transform duration-300 ${
+                  form.bestSeller ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+            <span className="text-sm font-medium text-dark">
+              {form.bestSeller ? "⭐ Best Seller" : "Best Seller"}
+            </span>
+          </div>
 
           <div className="flex items-center gap-3 pb-1">
             <button

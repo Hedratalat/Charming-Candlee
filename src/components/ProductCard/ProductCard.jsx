@@ -4,8 +4,13 @@ import { useCart } from "../../context/CartContext";
 // ── Popup Modal ────────────────────────────────────────────────────────────────
 function ProductModal({ product, onClose }) {
   const { addToCart, cart } = useCart();
-  const isInCart = cart.some((item) => item.id === product.id);
   const [selectedScents, setSelectedScents] = useState([]);
+  const selectedKey = selectedScents.slice().sort().join(",");
+  const isInCart = cart.some(
+    (item) =>
+      item.id === product.id &&
+      (item.selectedScents ?? []).slice().sort().join(",") === selectedKey,
+  );
 
   const scents = product.scent
     ? product.scent.split(" · ").map((s) => s.trim())
@@ -18,25 +23,22 @@ function ProductModal({ product, onClose }) {
   }
 
   function handleAddToCart() {
+    if (scents.length > 0 && selectedScents.length === 0) return;
     addToCart({ ...product, selectedScents });
     onClose();
   }
 
   return (
     <>
-      {/* Overlay */}
       <div
         onClick={onClose}
         className="fixed inset-0 bg-dark/50 z-50 backdrop-blur-sm"
       />
-
-      {/* Modal */}
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
           onClick={(e) => e.stopPropagation()}
           className="bg-secondary rounded-[24px] border border-border shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto"
         >
-          {/* Image */}
           <div className="relative h-[240px] overflow-hidden rounded-t-[24px] bg-[#F5E8D8] shrink-0">
             <img
               src={product.image}
@@ -48,7 +50,6 @@ function ProductModal({ product, onClose }) {
                 Out of Stock
               </div>
             )}
-            {/* Close button */}
             <button
               onClick={onClose}
               className="absolute top-3 right-3 w-8 h-8 rounded-full bg-dark/50 text-accent flex items-center justify-center hover:bg-dark transition-colors cursor-pointer"
@@ -57,9 +58,7 @@ function ProductModal({ product, onClose }) {
             </button>
           </div>
 
-          {/* Content */}
           <div className="p-6 space-y-4">
-            {/* Tags row */}
             <div className="flex items-center gap-2 flex-wrap">
               <span className="text-[10px] text-primary/70 font-medium bg-accent border border-border px-2 py-0.5 rounded-full">
                 {product.category}
@@ -71,7 +70,6 @@ function ProductModal({ product, onClose }) {
               )}
             </div>
 
-            {/* Name + subtitle */}
             <div>
               <h2 className="font-heading text-2xl font-bold text-dark leading-tight">
                 {product.name}
@@ -81,12 +79,10 @@ function ProductModal({ product, onClose }) {
               </p>
             </div>
 
-            {/* Description */}
             <p className="text-[13px] text-[#5a3a20] leading-[1.7] opacity-80">
               {product.description}
             </p>
 
-            {/* Scents selection */}
             {scents.length > 0 && (
               <div>
                 <div className="h-px bg-border mb-4" />
@@ -115,7 +111,6 @@ function ProductModal({ product, onClose }) {
               </div>
             )}
 
-            {/* Bottom */}
             <div className="h-px bg-border" />
             <div className="flex items-center justify-between pt-1">
               <span className="font-heading text-2xl font-bold text-primary">
@@ -123,10 +118,14 @@ function ProductModal({ product, onClose }) {
               </span>
               <button
                 onClick={handleAddToCart}
-                disabled={!product.inStock}
+                disabled={
+                  !product.inStock ||
+                  (scents.length > 0 && selectedScents.length === 0)
+                }
                 className={`flex items-center gap-1.5 px-5 py-[11px] rounded-xl text-[13px] font-semibold
                   text-accent border-none tracking-[0.02em] transition-all duration-300 active:scale-95 ${
-                    !product.inStock
+                    !product.inStock ||
+                    (scents.length > 0 && selectedScents.length === 0)
                       ? "bg-primary/40 cursor-not-allowed"
                       : isInCart
                         ? "bg-dark cursor-pointer"
@@ -135,6 +134,8 @@ function ProductModal({ product, onClose }) {
               >
                 {!product.inStock ? (
                   "Out of Stock"
+                ) : scents.length > 0 && selectedScents.length === 0 ? (
+                  "Pick a scent first"
                 ) : isInCart ? (
                   <>
                     <svg
@@ -182,6 +183,9 @@ export default function ProductCard({ product }) {
   const isInCart = cart.some((item) => item.id === product.id);
   const [imgLoaded, setImgLoaded] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const scents = product.scent
+    ? product.scent.split(" · ").map((s) => s.trim())
+    : [];
 
   return (
     <>
@@ -195,9 +199,7 @@ export default function ProductCard({ product }) {
          border-border shadow-[0_2px_8px_rgba(61,31,10,0.06),0_12px_40px_rgba(147,97,55,0.12)] transition-all 
          duration-300 ease-out hover:-translate-y-1 hover:shadow-[0_8px_24px_rgba(61,31,10,0.1),0_24px_60px_rgba(147,97,55,0.18)] cursor-pointer"
       >
-        {/* ── Image Area ── */}
         <div className="relative h-[280px] overflow-hidden bg-[#F5E8D8] shrink-0">
-          {/* Favourite button */}
           <button
             onClick={(e) => {
               e.stopPropagation();
@@ -233,10 +235,8 @@ export default function ProductCard({ product }) {
           />
         </div>
 
-        {/* ── Content ── */}
         <div className="flex flex-col flex-1 p-5">
           <div className="flex-1">
-            {/* Category + Size + icon */}
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2 flex-wrap">
                 <span className="text-[10px] text-primary/70 font-medium bg-accent border border-border px-2 py-0.5 rounded-full">
@@ -253,7 +253,6 @@ export default function ProductCard({ product }) {
               </span>
             </div>
 
-            {/* Name + subtitle */}
             <div className="mb-3">
               <h2 className="font-heading text-[22px] font-bold text-dark leading-tight m-0">
                 {product.name}
@@ -263,13 +262,11 @@ export default function ProductCard({ product }) {
               </p>
             </div>
 
-            {/* Description */}
             <p className="text-[13px] text-[#5a3a20] leading-[1.7] mb-3.5 opacity-80 line-clamp-3">
               {product.description}
             </p>
           </div>
 
-          {/* Bottom */}
           <div>
             <div className="h-px bg-border mb-4" />
             <div className="flex items-center justify-between">
@@ -279,7 +276,11 @@ export default function ProductCard({ product }) {
               <button
                 onClick={(e) => {
                   e.stopPropagation();
-                  addToCart(product);
+                  if (scents.length > 0) {
+                    setModalOpen(true);
+                  } else {
+                    addToCart(product);
+                  }
                 }}
                 disabled={!product.inStock}
                 className={`flex items-center gap-1.5 px-5 py-[11px] rounded-xl text-[13px] font-semibold
