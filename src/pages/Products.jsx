@@ -283,9 +283,9 @@ export default function Products() {
               <p className="text-[11px] text-primary font-medium tracking-[0.14em] uppercase mb-2">
                 Our Collection
               </p>
-              <h1 className="font-heading text-4xl font-bold text-dark">
+              <h2 className="font-heading text-4xl font-bold text-dark">
                 Scented Candles
-              </h1>
+              </h2>
             </div>
 
             {/* Mobile filter button */}

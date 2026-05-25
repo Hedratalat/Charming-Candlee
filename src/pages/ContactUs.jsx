@@ -237,9 +237,9 @@ export default function ContactUs() {
             <p className="font-body text-[0.75rem] font-semibold tracking-[0.2em] uppercase text-primary mb-3">
               Get in Touch
             </p>
-            <h1 className="font-heading text-[clamp(2rem,5vw,3.2rem)] font-bold text-dark leading-tight mb-3">
+            <h2 className="font-heading text-[clamp(2rem,5vw,3.2rem)] font-bold text-dark leading-tight mb-3">
               Contact Us
-            </h1>
+            </h2>
             <div className="flex justify-center mb-4">
               <Ornament />
             </div>

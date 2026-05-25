@@ -137,9 +137,9 @@ export default function AddProducts() {
         <p className="text-[11px] text-primary font-semibold tracking-[0.16em] uppercase mb-1">
           Dashboard
         </p>
-        <h1 className="font-heading text-3xl sm:text-4xl font-bold text-dark">
+        <h2 className="font-heading text-3xl sm:text-4xl font-bold text-dark">
           Add New Product
-        </h1>
+        </h2>
         <p className="text-sm text-primary/60 mt-1">
           Fill in the details below to list a new candle.
         </p>

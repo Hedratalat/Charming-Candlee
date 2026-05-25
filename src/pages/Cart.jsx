@@ -183,6 +183,7 @@ export default function Cart() {
                 </div>
 
                 <button
+                  onClick={() => navigate("/checkout")}
                   className="w-full bg-primary text-accent font-semibold text-[14px]
                   py-4 rounded-xl cursor-pointer hover:bg-[#7a5030] transition-colors
                   tracking-[0.02em] active:scale-[0.99]"

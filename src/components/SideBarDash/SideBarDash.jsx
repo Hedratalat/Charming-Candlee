@@ -5,6 +5,7 @@ export default function SideBarDash({ isOpen, setIsOpen }) {
   const navItems = [
     { to: "addProducts", label: "Add Products" },
     { to: "manageProducts", label: "Manage Products" },
+    { to: "orders", label: "Orders" },
     { to: "message", label: "Message" },
   ];
 

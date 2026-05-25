@@ -9,6 +9,10 @@ const ContactUs = lazy(() => import("./pages/ContactUs"));
 const Products = lazy(() => import("./pages/Products"));
 const Favorites = lazy(() => import("./pages/Favorites"));
 const Cart = lazy(() => import("./pages/Cart"));
+const Checkout = lazy(() => import("./pages/Checkout"));
+const OrderSuccess = lazy(() => import("./pages/OrderSuccess"));
+const MyOrders = lazy(() => import("./pages/MyOrders"));
+const LoginDash = lazy(() => import("./pages/LoginDash"));
 const DashBoardLayout = lazy(
   () => import("./components/DashboardLayout/DashboardLayout"),
 );
@@ -16,6 +20,8 @@ const DashBoardLayout = lazy(
 const AddProducts = lazy(() => import("./pages/AddProducts"));
 const ManageProducts = lazy(() => import("./pages/ManageProducts"));
 const MessageDash = lazy(() => import("./pages/MessageDash"));
+const OrderDash = lazy(() => import("./pages/OrderDash"));
+const ProtectedRoute = lazy(() => import("./pages/ProtectedRoute"));
 function App() {
   return (
     <>
@@ -28,20 +34,24 @@ function App() {
             <Route path="/products" element={<Products />} />
             <Route path="/favorites" element={<Favorites />} />
             <Route path="/cart" element={<Cart />} />
+            <Route path="/checkout" element={<Checkout />} />
+            <Route path="/order-success" element={<OrderSuccess />} />
+            <Route path="/MyOrders" element={<MyOrders />} />
+            <Route path="loginDash" element={<LoginDash />} />
             {/* //dashboard */}
             <Route
               path="/dashboard"
               element={
-                // <ProtectedRoute>
-                <DashBoardLayout />
-                // </ProtectedRoute>
+                <ProtectedRoute>
+                  <DashBoardLayout />
+                </ProtectedRoute>
               }
             >
               <Route index element={<Navigate to="addProducts" replace />} />
               <Route path="addProducts" element={<AddProducts />} />
               <Route path="ManageProducts" element={<ManageProducts />} />
-              {/* <Route path="Feedback" element={<FeedbackDash />} /> */}
               <Route path="message" element={<MessageDash />} />
+              <Route path="orders" element={<OrderDash />} />
             </Route>
           </Routes>
         </Suspense>
