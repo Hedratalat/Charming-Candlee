@@ -23,11 +23,18 @@ const MessageDash = lazy(() => import("./pages/MessageDash"));
 const OrderDash = lazy(() => import("./pages/OrderDash"));
 const ProtectedRoute = lazy(() => import("./pages/ProtectedRoute"));
 const FeedbackDash = lazy(() => import("./pages/FeedbackDash"));
+
+// ── Loading Spinner ────────────────────────────────────────────────────────────
+const LoadingSpinner = () => (
+  <div className="flex items-center justify-center h-screen bg-accent">
+    <div className="w-16 h-16 border-4 border-t-primary border-b-primary border-l-border border-r-border rounded-full animate-spin" />
+  </div>
+);
 function App() {
   return (
     <>
       <BrowserRouter>
-        <Suspense>
+        <Suspense fallback={<LoadingSpinner />}>
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/contact" element={<ContactUs />} />
