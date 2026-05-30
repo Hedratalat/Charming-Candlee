@@ -6,7 +6,7 @@ const allowedEmails = ["hedratalat1717@gmail.com", "charmingcandlee@gmail.com"];
 export default function ProtectedRoute({ children }) {
   const [user, loading] = useAuthState(auth);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading) return <p></p>;
 
   if (!user || !allowedEmails.includes(user.email)) {
     return <Navigate to="/" replace />;
