@@ -22,6 +22,7 @@ const ManageProducts = lazy(() => import("./pages/ManageProducts"));
 const MessageDash = lazy(() => import("./pages/MessageDash"));
 const OrderDash = lazy(() => import("./pages/OrderDash"));
 const ProtectedRoute = lazy(() => import("./pages/ProtectedRoute"));
+const FeedbackDash = lazy(() => import("./pages/FeedbackDash"));
 function App() {
   return (
     <>
@@ -51,6 +52,7 @@ function App() {
               <Route path="addProducts" element={<AddProducts />} />
               <Route path="ManageProducts" element={<ManageProducts />} />
               <Route path="message" element={<MessageDash />} />
+              <Route path="feedback" element={<FeedbackDash />} />
               <Route path="orders" element={<OrderDash />} />
             </Route>
           </Routes>
