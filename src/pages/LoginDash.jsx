@@ -19,27 +19,25 @@ export default function LoginDash() {
       setIsGoogleLoading(true);
       try {
         const result = await getRedirectResult(auth);
-        if (!result) return;
+        if (result) {
+          const user = result.user;
+          const userRef = doc(db, "Users", user.uid);
+          const userSnap = await getDoc(userRef);
 
-        const user = result.user;
-        const userRef = doc(db, "Users", user.uid);
-        const userSnap = await getDoc(userRef);
-
-        if (!userSnap.exists()) {
-          await setDoc(userRef, {
-            fullName: user.displayName || "",
-            email: user.email || "",
-            phone: "",
-            createdAt: new Date().toString(),
-            emailVerified: true,
-          });
-          toast.success(`Welcome, ${user.displayName || "User"}`);
-        } else {
-          await updateDoc(userRef, { emailVerified: true });
-          toast.success(`Welcome back, ${user.displayName || "User"}`);
+          if (!userSnap.exists()) {
+            await setDoc(userRef, {
+              fullName: user.displayName || "",
+              email: user.email || "",
+              phone: "",
+              createdAt: new Date().toString(),
+              emailVerified: true,
+            });
+            toast.success(`Welcome, ${user.displayName || "User"}`);
+          } else {
+            await updateDoc(userRef, { emailVerified: true });
+            toast.success(`Welcome back, ${user.displayName || "User"}`);
+          }
         }
-
-        navigate("/dashboard");
       } catch (error) {
         console.error(error);
         toast.error("Google sign-in failed. Try again.");
@@ -48,9 +46,17 @@ export default function LoginDash() {
       }
     };
 
-    checkRedirect();
-  }, []);
+    // ✅ ده اللي هيودي للـ dashboard بعد ما الـ auth يتأكد
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        navigate("/dashboard");
+      }
+    });
 
+    checkRedirect();
+
+    return () => unsubscribe(); // cleanup
+  }, []);
   const handleGoogleSignIn = async () => {
     const provider = new GoogleAuthProvider();
     await signInWithRedirect(auth, provider);
