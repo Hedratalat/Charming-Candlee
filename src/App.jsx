@@ -45,7 +45,7 @@ function App() {
             <Route path="/checkout" element={<Checkout />} />
             <Route path="/order-success" element={<OrderSuccess />} />
             <Route path="/MyOrders" element={<MyOrders />} />
-            <Route path="loginDash" element={<LoginDash />} />
+            <Route path="/loginDash" element={<LoginDash />} />
             {/* //dashboard */}
             <Route
               path="/dashboard"
