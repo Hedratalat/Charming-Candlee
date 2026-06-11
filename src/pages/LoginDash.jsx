@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
-import { signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import {
+  signInWithRedirect,
+  getRedirectResult,
+  GoogleAuthProvider,
+} from "firebase/auth";
 import { auth, db } from "../../firebase";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 
@@ -10,38 +14,46 @@ export default function LoginDash() {
   const navigate = useNavigate();
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
 
-  const handleGoogleSignIn = async () => {
-    setIsGoogleLoading(true);
-    try {
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const user = result.user;
+  useEffect(() => {
+    const checkRedirect = async () => {
+      setIsGoogleLoading(true);
+      try {
+        const result = await getRedirectResult(auth);
+        if (!result) return;
 
-      const userRef = doc(db, "Users", user.uid);
-      const userSnap = await getDoc(userRef);
+        const user = result.user;
+        const userRef = doc(db, "Users", user.uid);
+        const userSnap = await getDoc(userRef);
 
-      if (!userSnap.exists()) {
-        await setDoc(userRef, {
-          fullName: user.displayName || "",
-          email: user.email || "",
-          phone: "",
-          createdAt: new Date().toString(),
-          emailVerified: true,
-        });
-        toast.success(`Welcome, ${user.displayName || "User"}`);
-      } else {
-        await updateDoc(userRef, { emailVerified: true });
-        toast.success(`Welcome back, ${user.displayName || "User"}`);
-      }
+        if (!userSnap.exists()) {
+          await setDoc(userRef, {
+            fullName: user.displayName || "",
+            email: user.email || "",
+            phone: "",
+            createdAt: new Date().toString(),
+            emailVerified: true,
+          });
+          toast.success(`Welcome, ${user.displayName || "User"}`);
+        } else {
+          await updateDoc(userRef, { emailVerified: true });
+          toast.success(`Welcome back, ${user.displayName || "User"}`);
+        }
 
-      navigate("/dashboard");
-    } catch (error) {
-      if (error.code !== "auth/popup-closed-by-user") {
+        navigate("/dashboard");
+      } catch (error) {
+        console.error(error);
         toast.error("Google sign-in failed. Try again.");
+      } finally {
+        setIsGoogleLoading(false);
       }
-    } finally {
-      setIsGoogleLoading(false);
-    }
+    };
+
+    checkRedirect();
+  }, []);
+
+  const handleGoogleSignIn = async () => {
+    const provider = new GoogleAuthProvider();
+    await signInWithRedirect(auth, provider);
   };
 
   return (
